@@ -4,7 +4,7 @@ extern "C"
 {
     extern unsigned int synthGetSize();
 
-    extern void synthInit(void *pthis, const void *patchmap, int samplerate=44100);
+    extern void synthInit(void *pthis, const void *patchmap, int samplerate=44100, bool use_ronan=false);
     extern void synthRender(void *pthis, void *buf, int smp, void *buf2=0, int add=0);
     extern void synthProcessMIDI(void *pthis, const void *ptr);
     extern void synthSetGlobals(void *pthis, const void *ptr);
@@ -23,8 +23,6 @@ extern "C"
 
     extern long synthGetFrameSize(void *pthis);
 
-#ifdef RONAN
     extern void synthSetLyrics(void *pthis, const char **ptr);
-#endif
 
 }

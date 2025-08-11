@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(SO_VERSION 0)
-set(DATE_VERSION "2025.07.06")
-set(V2M_MAN_DATE "07 Jul 2025")
+set(DATE_VERSION "2025.08.11")
+set(V2M_MAN_DATE "11 Aug 2025")
 set(V2M_VERSION ${SO_VERSION}.${DATE_VERSION})
 project(v2mplayer VERSION ${V2M_VERSION})
 
@@ -20,7 +20,6 @@ add_library(v2m_obj OBJECT
     src/sounddef.cpp
 )
 set_property(TARGET v2m_obj PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_compile_definitions(v2m_obj PRIVATE RONAN)
 
 add_library(v2m
     SHARED

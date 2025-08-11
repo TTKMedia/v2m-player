@@ -1,4 +1,3 @@
-#include "types.h"
 #include "synth.h"
 #include <math.h>
 #include <assert.h>
@@ -243,7 +242,6 @@ static inline float lerp(float a, float b, float t)
 
 // DEBUG
 #include <stdarg.h>
-#include <stdio.h>
 
 // --------------------------------------------------------------------------
 // Building blocks
@@ -2574,8 +2572,6 @@ struct syWRonan
     uint8_t mem[64*1024]; // "that should be enough" --synth.asm. :)
 };
 
-#ifdef RONAN
-
 extern "C"
 {
 void ronanCBInit(syWRonan *pthis);
@@ -2586,20 +2582,6 @@ void ronanCBSetCtl(syWRonan *pthis, uint32_t ctl, uint32_t val);
 void ronanCBProcess(syWRonan *pthis, float *buf, uint32_t len);
 void ronanCBSetSR(syWRonan *pthis, int samplerate);
 }
-
-#else
-
-static inline void ronanCBInit(syWRonan *) {}
-static inline void ronanCBTick(syWRonan *) {}
-static inline void ronanCBNoteOn(syWRonan *) {}
-static inline void ronanCBNoteOff(syWRonan *) {}
-static inline void ronanCBSetCtl(syWRonan *, uint32_t, uint32_t) {}
-static inline void ronanCBProcess(syWRonan *, float *, uint32_t) {}
-static inline void ronanCBSetSR(syWRonan *, int) {}
-
-extern "C" void synthSetLyrics(void *, const char **) {}
-
-#endif
 
 // --------------------------------------------------------------------------
 // Synth
@@ -2655,6 +2637,7 @@ struct V2Synth
     float hcbuf[2];  // high cut buf l/r
 
     bool initialized;
+    bool use_ronan;
 
     // delay buffers
     float maindelbuf[2][32768];
@@ -2664,7 +2647,7 @@ struct V2Synth
 
     syWRonan ronan;
 
-    void init(const void *patchmap, int samplerate)
+    void init(const void *patchmap, int samplerate, bool use_ronan)
     {
         // Ahem, so this is somewhat dubious, but we don't use
         // virtual functions or anything so it should be fine. Ahem.
@@ -2673,8 +2656,11 @@ struct V2Synth
 
         // set sampling rate
         this->samplerate = samplerate;
+        this->use_ronan = use_ronan;
         instance.calcNewSampleRate(samplerate);
-        ronanCBSetSR(&ronan, samplerate);
+        if (use_ronan) {
+            ronanCBSetSR(&ronan, samplerate);
+        }
 
         // patch map
         this->patchmap = (const V2PatchMap*)patchmap;
@@ -2696,7 +2682,9 @@ struct V2Synth
         // global filters
         reverb.init(&instance);
         delay.init(&instance, maindelbuf[0], maindelbuf[1], COUNTOF(maindelbuf[0]));
-        ronanCBInit(&ronan);
+        if (use_ronan) {
+            ronanCBInit(&ronan);
+        }
         compr.init(&instance);
         dcf.init(&instance);
 
@@ -2802,7 +2790,7 @@ struct V2Synth
                 if (cmd[1] != 0) // velocity==0 is actually a note off
                 {
                     COVER("MIDI note on");
-                    if (chan == CHANS - 1)
+                    if ((chan == CHANS - 1) && use_ronan)
                         ronanCBNoteOn(&ronan);
 
                     // calculate current polyphony for this channel
@@ -2889,7 +2877,7 @@ struct V2Synth
 
             case 0: // Note off
                 COVER("MIDI note off");
-                if (chan == CHANS - 1)
+                if ((chan == CHANS - 1) && use_ronan)
                     ronanCBNoteOff(&ronan);
 
                 for (int i = 0; i < POLY; i++)
@@ -2916,7 +2904,7 @@ struct V2Synth
                 if (ctrl >= 1 && ctrl <= 7)
                 {
                     chans[chan].ctl[ctrl - 1] = val;
-                    if (chan == CHANS-1)
+                    if ((chan == CHANS-1) && use_ronan)
                         ronanCBSetCtl(&ronan, ctrl, val);
                 }
                 else if (ctrl == 120) // CC #120: all sound off
@@ -2934,7 +2922,7 @@ struct V2Synth
                 else if (ctrl == 123) // CC #123: all notes off
                 {
                     COVER("MIDI CC all notes off");
-                    if (chan == CHANS-1)
+                    if ((chan == CHANS-1) && use_ronan)
                         ronanCBNoteOff(&ronan);
 
                     for (int i=0; i < POLY; i++)
@@ -2984,7 +2972,7 @@ struct V2Synth
             case 7: // System
                 COVER("MIDI system exclusive");
                 if (chan == 0xf) // Reset
-                    init(patchmap, samplerate);
+                    init(patchmap, samplerate, use_ronan);
                 break; // rest ignored
             }
         }
@@ -3157,7 +3145,9 @@ private:
         for (int i = 0; i < CHANS; i++)
             storeChanValues(i);
 
-        ronanCBTick(&ronan);
+        if (use_ronan) {
+            ronanCBTick(&ronan);
+        }
         tickd = instance.SRcFrameSize;
         renderFrame();
 
@@ -3215,7 +3205,7 @@ private:
             }
 
             // channel 15 -> Ronan
-            if (chan == CHANS - 1)
+            if ((chan == CHANS - 1) && use_ronan)
                 ronanCBProcess(&ronan, &instance.chanbuf[0].l, nsamples);
 
             chansw[chan].process(nsamples);
@@ -3264,9 +3254,9 @@ unsigned int synthGetSize()
     return sizeof(V2Synth);
 }
 
-void synthInit(void *pthis, const void *patchmap, int samplerate)
+void synthInit(void *pthis, const void *patchmap, int samplerate, bool use_ronan)
 {
-    ((V2Synth *)pthis)->init(patchmap, samplerate);
+    ((V2Synth *)pthis)->init(patchmap, samplerate, use_ronan);
 }
 
 void synthRender(void *pthis, void *buf, int smp, void *buf2, int add)

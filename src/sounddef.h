@@ -321,10 +321,8 @@ extern int       *v2vsizes;
 extern int       *v2gsizes;
 extern int       v2curpatch;
 
-#ifdef RONAN
 extern char      speech[64][256];
 extern char      *speechptrs[64];
-#endif
 
 extern void sdInit();
 extern void sdClose();

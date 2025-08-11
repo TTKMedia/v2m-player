@@ -1,11 +1,8 @@
-#include "types.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 
 #include "sounddef.h"
-#include "v2mconv.h"
 
 const char *v2sources[] =
 {
@@ -41,10 +38,8 @@ int           *v2topics2;
 int           *v2gtopics2;
 int           v2curpatch;
 
-#ifdef RONAN
 char          speech[64][256];
 char          *speechptrs[64];
-#endif
 
 void sdInit()
 {
@@ -124,13 +119,11 @@ void sdInit()
         p += v2gtopics[i].no;
     }
 
-#ifdef RONAN
     memset(speech, 0, 64*256);
     for (int i = 0; i < 64; i++)
         speechptrs[i] = speech[i];
 
     strcpy(speech[0], "!DHAX_ !kwIH_k !br4AH_UHn !fAA_ks !jAH_mps !OW!vER_ !DHAX_ !lEY!zIY_ !dAA_g ");
-#endif
 }
 
 void sdClose()

@@ -68,7 +68,8 @@ extern "C"
   // pthis     : pointer to work mem
   // patchmap  : pointer to patch data
   // samplerate: output sample rate (44100-192000 Hz), use 44100 when playing with dsio
-  void synthInit(void *pthis, const void *patchmap, int samplerate=44100);
+  // use_ronan : enable or disable ronan
+  void synthInit(void *pthis, const void *patchmap, int samplerate=44100, bool use_ronan=false);
 
   // inits global parameters
   // pthis: pointer to work mem

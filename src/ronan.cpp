@@ -2,9 +2,6 @@
 
 // !DHAX_ !kwIH_k !br4AH_UHn !fAA_ks !jAH_mps !OW!vE_R !DHAX_ !lEY!zIY_ !dAA_g
 
-#ifdef RONAN
-
-#include "types.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -476,4 +473,3 @@ extern "C" void synthSetLyrics(void *a_pthis, const char **a_ptr)
     for (int i = 0; i < 64; i++) wsptr->texts[i] = a_ptr[i];
     wsptr->baseptr = wsptr->ptr = wsptr->texts[0];
 }
-#endif

@@ -38,7 +38,7 @@ public:
 
     // returns  : flag if succeeded
     //
-    bool Open(const void *a_v2mptr, uint32_t a_samplerate=44100);
+    bool Open(const void *a_v2mptr, uint32_t a_samplerate=44100, bool a_ronan = false);
 
     // closes player
     //
@@ -200,6 +200,7 @@ private:
     uint8_t      m_midibuf[4096];
     float        m_fadeval;
     float        m_fadedelta;
+    bool         m_ronan = false;
 
     // internal methods
     bool InitBase(const void *a_v2m);  // inits base struct from v2m

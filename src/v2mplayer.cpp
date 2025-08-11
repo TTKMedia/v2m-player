@@ -152,7 +152,7 @@ void V2MPlayer::Reset()
 
     if (m_samplerate)
     {
-        synthInit(m_synth, (void*)m_base.patchmap, m_samplerate);
+        synthInit(m_synth, (void*)m_base.patchmap, m_samplerate, m_ronan);
         synthSetGlobals(m_synth, (void*)m_base.globals);
         synthSetLyrics(m_synth, m_base.speechptrs);
     }
@@ -259,12 +259,16 @@ void V2MPlayer::Tick()
         m_state.state = PlayerState::STOPPED;
 }
 
-bool V2MPlayer::Open(const void *a_v2mptr, uint32_t a_samplerate)
+bool V2MPlayer::Open(const void *a_v2mptr, uint32_t a_samplerate, bool a_ronan)
 {
     if (m_base.valid)
         Close();
 
+    if (a_samplerate == 0) {
+        a_samplerate = 44100;
+    }
     m_samplerate = a_samplerate;
+    m_ronan = a_ronan;
 
     if (!InitBase(a_v2mptr))
         return sFALSE;

@@ -16,7 +16,6 @@
 #include <SDL2/SDL.h>
 
 #include "v2mplayer.h"
-#include "libv2.h"
 #include "v2mconv.h"
 #include "sounddef.h"
 
@@ -41,6 +40,7 @@ static void V2mPlayerUsage()
     printf("          -g N.N  gain (float, optional, default = 1.0)\n");
     printf("          -f N    frame size for SDL (int, optional, default = 1024)\n");
     printf("          -k      key/auto stop (bool, optional, default = false)\n");
+    printf("          -r      enable ronan (bool, optional, default = false)\n");
     printf("          -o str  output v2m newest version (string, optional, default = none)\n");
     printf("          -h      this help\n");
 }
@@ -115,13 +115,17 @@ int main(int argc, char** argv)
     int fouts = 0;
     int fkey = 0;
     int fhelp = 0;
+    bool use_ronan = false;
     char *foutput;
-    while ((opt = getopt(argc, argv, "ko:hs:g:f:")) != -1)
+    while ((opt = getopt(argc, argv, "kro:hs:g:f:")) != -1)
     {
         switch(opt)
         {
             case 'k':
                 fkey = 1;
+                break;
+            case 'r':
+                use_ronan = true;
                 break;
             case 'o':
                 foutput = optarg;
@@ -246,7 +250,7 @@ int main(int argc, char** argv)
     }
 
     player.Init();
-    player.Open(theTune);
+    player.Open(theTune, 0, use_ronan);
 
     if (! init_sdl()) {
         return 1;

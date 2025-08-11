@@ -22,6 +22,9 @@ gain (float, optional, default = 1.0)
 \fB-k\fP
 key/auto stop (bool, optional, default = false)
 .TP
+\fB-r\fP
+enable ronan (bool, optional, default = false)
+.TP
 \fB-o\fP str
 output v2m newest version (string, optional, default = none)
 .TP
